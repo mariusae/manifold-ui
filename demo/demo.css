@@ -1,0 +1,61 @@
+/* The demo's own tiles. They're drawn in the theme's colours (the --mf-*
+   properties on .mf-root), so they change with it. */
+
+html, body, #app { height: 100%; margin: 0; overflow: hidden; background: #111; }
+
+.demo-term {
+  height: 100%; overflow-y: auto; padding: 10px 14px 12px;
+  font: 12px/1.5 var(--mf-font-mono);
+  background: var(--mf-term-background); color: var(--mf-term-foreground);
+  cursor: text;
+}
+.demo-term-line { white-space: pre-wrap; word-break: break-word; min-height: 18px; }
+.demo-term-command { margin-bottom: 4px; }
+.demo-term-cmd { font-weight: 600; }
+.demo-term-ps { color: var(--mf-accent-text); }
+.demo-term-err { color: var(--mf-status-failed); }
+.demo-term-ok { color: var(--mf-status-done); }
+.demo-term-prompt { display: flex; gap: 8px; align-items: baseline; }
+.demo-term-input {
+  flex: 1; min-width: 0; border: 0; outline: 0; padding: 0; background: none;
+  font: inherit; color: inherit; caret-color: var(--mf-caret);
+}
+.demo-term-input::placeholder { color: var(--mf-text-tertiary); }
+
+.demo-page { height: 100%; overflow-y: auto; background: var(--mf-tile-ground); }
+.demo-page-body { max-width: 660px; margin: 0 auto; padding: 18px 28px 80px; outline: 0; font-size: 14px; line-height: 1.55; color: var(--mf-text-body); min-height: 100%; }
+.demo-page-body h1 { font-size: 22px; line-height: 1.25; margin: 6px 0 10px; color: var(--mf-text-strong); }
+.demo-page-body h2 { font-size: 16px; margin: 26px 0 6px; color: var(--mf-text-strong); }
+.demo-page-body h3 { font-size: 13.5px; margin: 18px 0 4px; color: var(--mf-text-strong); }
+.demo-page-body p { margin: 0 0 10px; }
+.demo-page-body ul { margin: 0 0 10px; padding-left: 20px; }
+.demo-page-body li { margin: 2px 0; }
+.demo-page-body kbd { font: 12px var(--mf-font); padding: 1px 5px; border-radius: 4px; background: var(--mf-well); white-space: nowrap; }
+.demo-page-body code { font: 12.5px var(--mf-font-mono); padding: 1px 4px; border-radius: 4px; background: var(--mf-well); }
+.demo-page-body ::selection, .demo-term ::selection { background: var(--mf-text-selection); }
+.demo-link {
+  display: inline-flex; align-items: center; gap: 4px; height: 20px; padding: 0 7px; border-radius: 6px; vertical-align: baseline;
+  background: var(--mf-panel); box-shadow: inset 0 0 0 0.5px var(--mf-panel-border); color: var(--mf-link); font-size: 12.5px; cursor: pointer;
+}
+
+.demo-folder, .demo-agent, .demo-look { height: 100%; overflow-y: auto; display: flex; flex-direction: column; background: var(--mf-tile-ground); user-select: none; -webkit-user-select: none; cursor: default; }
+.demo-hint { padding: 10px 16px; font-size: 12px; line-height: 1.45; color: var(--mf-text-secondary); }
+.demo-list { padding: 0 6px 10px; }
+.demo-row { display: flex; align-items: center; gap: 8px; height: 26px; padding: 0 10px; border-radius: 6px; color: var(--mf-text); }
+.demo-row:hover { background: var(--mf-hover); }
+.demo-row .mf-icon { color: var(--mf-text-secondary); }
+.demo-row-name { flex: none; }
+.demo-row-detail { flex: 1; min-width: 0; text-align: right; font-size: 11.5px; color: var(--mf-text-tertiary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.demo-agent-log { flex: 1; min-height: 0; overflow-y: auto; padding: 14px 18px 4px; font-size: 13px; line-height: 1.5; color: var(--mf-text-body); user-select: text; -webkit-user-select: text; }
+.demo-agent-line { margin-bottom: 6px; }
+.demo-agent-ask { color: var(--mf-status-attention); font-weight: 500; }
+.demo-agent-done { color: var(--mf-status-done); font-weight: 500; }
+.demo-agent-actions { display: flex; gap: 8px; padding: 10px 18px 14px; }
+
+.demo-look { padding: 8px 0 12px; }
+.demo-look-section { padding: 8px 18px; }
+.demo-look-label { font: 500 11px var(--mf-font); color: var(--mf-text-secondary); margin-bottom: 5px; }
+.demo-look-controls { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.demo-web { display: block; width: 100%; height: 100%; border: 0; background: #fff; }

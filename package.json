@@ -1,0 +1,17 @@
+{
+  "name": "manifold-ui",
+  "version": "0.1.0",
+  "description": "A web toolkit for Manifold-style interfaces: a sidebar of spaces, columns of tiles, and the interaction model that goes with them.",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./arrangement": "./src/core/arrangement.js",
+    "./manifold.css": "./src/manifold.css"
+  },
+  "scripts": {
+    "demo": "node scripts/serve.js",
+    "test": "node --test test/"
+  },
+  "license": "MIT"
+}

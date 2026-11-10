@@ -1,0 +1,195 @@
+/* The scrubber and outlines (scrubber/): a view's strip — a scroll bar that
+ * is only its knob, and a lane of ticks over the content beside it — the
+ * card a tick shows, and a tile's own sidebar.
+ */
+
+/* A scrolling element a strip is bound to: the strip is its scroll bar. */
+.mf-scroll-bound { scrollbar-width: none; -ms-overflow-style: none; }
+.mf-scroll-bound::-webkit-scrollbar { display: none; width: 0; height: 0; }
+
+/* ---------------------------------------------------------------- strip */
+
+/* 30 wide at the view's right edge: the lane (0…16) over the content, the
+ * scroll bar (16…30) beside it. It clips nothing (a swollen tick reaches
+ * left of it) and takes the pointer only on the knob's column and, while
+ * the ticks show, on their block. */
+.mf-strip {
+  position: absolute; top: 0; right: 0; bottom: 0; width: 30px; height: auto;
+  z-index: 5; overflow: visible; pointer-events: none;
+  user-select: none; -webkit-user-select: none;
+}
+.mf-strip-column {
+  position: absolute; left: 0; top: 0; bottom: 0; width: 16px;
+  opacity: 0; pointer-events: none;
+}
+.mf-strip-tick {
+  position: absolute; right: 2px; width: 12px; height: 3px; border-radius: 1.5px;
+  background-color: var(--mf-text-tertiary);
+  transition:
+    width var(--mf-strip-time, 0ms) ease-out,
+    top var(--mf-strip-time, 0ms) ease-out,
+    height var(--mf-strip-time, 0ms) ease-out,
+    background-color var(--mf-strip-time, 0ms) ease-out;
+}
+.mf-strip-chevron { position: absolute; display: block; color: var(--mf-text-tertiary); }
+.mf-strip-chevron.mf-over { color: var(--mf-text); }
+.mf-strip-hit {
+  position: absolute; left: 0; width: 16px;
+  pointer-events: none; cursor: default; touch-action: none;
+}
+.mf-strip.mf-revealed .mf-strip-hit { pointer-events: auto; }
+
+.mf-scrubber {
+  position: absolute; top: 0; bottom: 0; right: 0; width: 14px;
+  pointer-events: auto; cursor: default; touch-action: none;
+}
+.mf-scrubber-knob {
+  position: absolute; left: 3px; width: 8px; min-height: 12px;
+  border-radius: var(--mf-radius-inline, 4px);
+  background: var(--mf-scrubber-knob);
+  pointer-events: none;
+}
+.mf-scrubber-knob.mf-dragging { background: var(--mf-handle); }
+
+/* The card of the tick pointed at: above everything, taking nothing. */
+.mf-strip-card {
+  position: fixed; left: 0; top: 0; z-index: 1000;
+  box-sizing: border-box; width: 280px; padding: 10px 12px;
+  background: var(--mf-panel);
+  border-radius: var(--mf-radius-surface, 10px);
+  box-shadow: var(--mf-shadow-float, 0 3px 24px rgba(0, 0, 0, 0.16)), 0 0 0 0.5px var(--mf-panel-border);
+  color: var(--mf-text);
+  font: 13px/16px var(--mf-font);
+  pointer-events: none;
+  user-select: none; -webkit-user-select: none;
+  cursor: default;
+}
+.mf-strip-card-title {
+  font: 600 13px/16px var(--mf-font);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.mf-strip-card-detail {
+  margin-top: 2px;
+  font: 400 11px/14px var(--mf-font); color: var(--mf-text-secondary);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.mf-strip-card-body {
+  margin-top: 6px; max-height: 112px; overflow: hidden;
+  font: 400 13px/16px var(--mf-font); color: var(--mf-text-secondary);
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 6; line-clamp: 6;
+  overflow-wrap: anywhere;
+}
+.mf-strip-card-body.mf-code {
+  display: block;
+  font: 400 11px/14px var(--mf-font-mono);
+}
+.mf-strip-card-body.mf-code > div { white-space: pre; overflow: hidden; text-overflow: ellipsis; }
+
+/* ------------------------------------------------- content, strip, sidebar */
+
+.mf-outlined { position: relative; width: 100%; height: 100%; overflow: hidden; }
+.mf-outlined-main { position: absolute; left: 0; top: 0; right: 0; bottom: 0; }
+.mf-outlined-content {
+  position: absolute; left: 0; top: 0; bottom: 0; right: 14px;
+  width: auto; height: auto;
+  overflow-x: hidden; overflow-y: auto;
+}
+.mf-outlined > .mf-tile-sidebar { position: absolute; left: 0; top: 0; bottom: 0; height: auto; }
+
+/* -------------------------------------------------------- a tile's sidebar */
+
+/* A panel at its left that melts into the tile's page at its right. */
+.mf-tile-sidebar {
+  position: relative; box-sizing: border-box; height: 100%; flex: none;
+  border-right: 1px solid var(--mf-divider);
+  background: linear-gradient(to right, var(--mf-panel) 0%, var(--mf-panel) 45%, var(--mf-tile-ground, var(--mf-window)) 100%);
+  color: var(--mf-text);
+  font: 13px/1.3 var(--mf-font);
+  user-select: none; -webkit-user-select: none;
+  cursor: default;
+}
+.mf-tile-sidebar-filter {
+  position: absolute; left: 8px; right: 8px; top: 8px; height: 22px;
+  box-sizing: border-box; border-radius: 11px;
+  background: color-mix(in srgb, var(--mf-text) 6%, transparent);
+  display: flex; align-items: center; gap: 4px; padding: 0 5px 0 7px;
+  cursor: text;
+}
+.mf-tile-sidebar-glass { flex: none; display: flex; color: var(--mf-text-secondary); }
+.mf-tile-sidebar-input {
+  flex: 1; min-width: 0; height: 22px; margin: 0; padding: 0;
+  appearance: none; -webkit-appearance: none; border: 0; outline: 0; background: none; box-shadow: none;
+  font: 400 13px/22px var(--mf-font); color: var(--mf-text); caret-color: var(--mf-caret, var(--mf-accent));
+  user-select: text; -webkit-user-select: text;
+}
+.mf-tile-sidebar-input::placeholder { color: var(--mf-text-tertiary); opacity: 1; }
+.mf-tile-sidebar-input::selection { background: var(--mf-text-selection, var(--mf-band)); }
+.mf-tile-sidebar-clear {
+  flex: none; width: 14px; height: 14px; margin: 0; padding: 0;
+  appearance: none; -webkit-appearance: none; border: 0; background: none;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--mf-text-tertiary); cursor: default;
+}
+.mf-tile-sidebar-clear:hover { color: var(--mf-text-secondary); }
+.mf-tile-sidebar-clear[hidden] { display: none; }
+
+.mf-tile-sidebar-list {
+  position: absolute; left: 0; right: 0; top: 36px; bottom: 0;
+  overflow-x: hidden; overflow-y: auto; outline: 0;
+  scrollbar-width: thin; scrollbar-color: var(--mf-scrubber-knob) transparent;
+}
+.mf-tile-sidebar-empty {
+  position: absolute; left: 0; right: 0; top: calc(36px + (100% - 36px) / 2 - 10px); height: 20px;
+  font: 400 12px/20px var(--mf-font); color: var(--mf-text-secondary);
+  text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  pointer-events: none;
+}
+.mf-tile-sidebar-empty[hidden] { display: none; }
+
+/* A row: a 3pt mark, the title, and at the right what there is to say of it. */
+.mf-outline-row {
+  position: relative; box-sizing: border-box; height: 24px;
+  display: flex; align-items: center;
+  padding: 0 10px 0 12px;
+}
+.mf-outline-row::before {
+  content: ""; position: absolute; left: 6px; right: 6px; top: 1px; bottom: 1px;
+  border-radius: var(--mf-radius-control, 6px);
+}
+.mf-outline-row:hover:not(.mf-selected)::before { background: var(--mf-hover); }
+.mf-outline-row.mf-selected::before { background: var(--mf-band-inactive); }
+.mf-tile-sidebar:focus-within .mf-outline-row.mf-selected::before { background: var(--mf-band); }
+.mf-outline-row > * { position: relative; }
+.mf-outline-mark {
+  flex: none; width: 3px; height: 3px; border-radius: 1.5px; margin-right: 7px;
+  background: color-mix(in srgb, var(--mf-text-secondary) 60%, transparent);
+}
+.mf-outline-row.mf-failed .mf-outline-mark { background: var(--mf-status-failed); }
+.mf-outline-row.mf-running .mf-outline-mark { background: var(--mf-accent); }
+.mf-outline-title {
+  flex: 1; min-width: 0; height: 16px;
+  font: 400 12px/16px var(--mf-font); color: var(--mf-text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.mf-outline-row.mf-level-0 .mf-outline-title { font: 600 12.5px/16px var(--mf-font); }
+.mf-outline-row.mf-code .mf-outline-title { font: 400 11.5px/16px var(--mf-font-mono); }
+/* A path gives up its head and keeps the file's name. */
+.mf-outline-row.mf-path .mf-outline-title { direction: rtl; text-align: left; }
+.mf-outline-detail {
+  flex: none; max-width: 140px; height: 14px; margin-left: 8px;
+  font: 400 10.5px/14px var(--mf-font); font-variant-numeric: tabular-nums;
+  color: var(--mf-text-secondary); text-align: right;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* Its right edge resizes it (every tile's, at once): a pill shows under the pointer. */
+.mf-tile-sidebar-resize {
+  position: absolute; right: -1px; top: 0; bottom: 0; width: 6px;
+  cursor: col-resize; z-index: 3; touch-action: none;
+}
+.mf-tile-sidebar-resize::after {
+  content: ""; position: absolute; left: 1px; top: 50%; width: 3px; height: 36px; margin-top: -18px;
+  border-radius: var(--mf-radius-hair, 1.5px); background: var(--mf-handle);
+  opacity: 0; transition: opacity var(--mf-fast, 0.12s);
+}
+.mf-tile-sidebar-resize:hover::after, .mf-tile-sidebar-resize.mf-dragging::after { opacity: 1; }

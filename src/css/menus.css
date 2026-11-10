@@ -1,0 +1,127 @@
+/* manifold-ui — menus.
+ *
+ * Two kinds. A context menu (overlay/menu.js) looks as the system's does:
+ * frosted, radius 6, rows 22 high, the highlighted row on an accent band.
+ * Manifold's own footer menu (overlay/popmenu.js, PopMenu.swift) is a
+ * popover 330 wide: a search row, perhaps a row of filter chips, then
+ * rows in sections, the one chosen on an accent band of radius 7.
+ */
+
+/* --------------------------------------------------------- context menu */
+
+/* Over everything while a menu is up: a press off the menu lands here, and
+   closes it, instead of on what's beneath. */
+.mf-menu-catcher {
+  position: fixed; inset: 0; z-index: 2147483600;
+  cursor: default; user-select: none; -webkit-user-select: none;
+}
+.mf-menu {
+  position: absolute; left: 0; top: 0; box-sizing: border-box;
+  min-width: 100px; max-width: min(480px, calc(100vw - 12px));
+  padding: 5px 0; border-radius: 6px;
+  background: var(--mf-menu);
+  backdrop-filter: var(--mf-menu-frost); -webkit-backdrop-filter: var(--mf-menu-frost);
+  box-shadow: var(--mf-shadow-popover), 0 0 0 0.5px var(--mf-line);
+  font: 13px/22px var(--mf-font, -apple-system, BlinkMacSystemFont, system-ui, sans-serif);
+  color: var(--mf-text);
+  overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none;
+  -webkit-font-smoothing: antialiased;
+}
+.mf-menu::-webkit-scrollbar { display: none; }
+.mf-menu-item {
+  box-sizing: border-box; display: flex; align-items: center;
+  height: 22px; margin: 0 5px; padding: 0 9px; border-radius: 4px;
+  white-space: nowrap;
+}
+.mf-menu.mf-has-checks .mf-menu-item { padding-left: 4px; }
+.mf-menu-check { flex: none; width: 10px; margin-right: 5px; display: flex; align-items: center; justify-content: center; }
+.mf-menu-symbol { flex: none; width: 16px; margin-right: 6px; display: flex; align-items: center; justify-content: center; color: var(--mf-text); }
+.mf-menu-dot { flex: none; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; box-shadow: inset 0 0 0 0.5px var(--mf-line); }
+.mf-menu-title { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.mf-menu-key { flex: none; margin-left: 24px; color: var(--mf-text-secondary); font-variant-numeric: tabular-nums; }
+.mf-menu-chevron { flex: none; margin-left: 12px; margin-right: -3px; display: flex; align-items: center; color: var(--mf-text-secondary); }
+.mf-menu-item.mf-highlighted { background: var(--mf-accent); color: #fff; }
+.mf-menu-item.mf-highlighted .mf-menu-symbol,
+.mf-menu-item.mf-highlighted .mf-menu-key,
+.mf-menu-item.mf-highlighted .mf-menu-chevron { color: #fff; }
+.mf-menu-item.mf-disabled { opacity: 0.4; }
+.mf-menu-separator { height: 1px; margin: 5px 14px; background: var(--mf-divider); }
+.mf-menu-header {
+  box-sizing: border-box; height: 22px; padding: 2px 14px 0 14px;
+  font: 600 11px/20px var(--mf-font, -apple-system, BlinkMacSystemFont, system-ui, sans-serif);
+  color: var(--mf-text-secondary);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* ------------------------------------------------------------- pop menu */
+
+.mf-popmenu {
+  position: absolute; z-index: 100; box-sizing: border-box;
+  width: 330px; display: flex; flex-direction: column; overflow: hidden;
+  color: var(--mf-text); cursor: default;
+}
+.mf-popmenu [hidden] { display: none !important; }
+.mf-popmenu-search {
+  flex: none; height: 44px; display: flex; align-items: center;
+  padding: 0 12px 0 14px;
+}
+.mf-popmenu-glass { flex: none; width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; color: var(--mf-text-secondary); }
+.mf-popmenu-field {
+  appearance: none; -webkit-appearance: none; box-sizing: border-box;
+  flex: 1; min-width: 0; height: 22px; margin: 0 6px 0 8px; padding: 0; border: 0; outline: 0; background: none;
+  font: 15px/22px var(--mf-font); color: var(--mf-text); caret-color: var(--mf-caret, var(--mf-accent));
+  user-select: text; -webkit-user-select: text; cursor: text;
+}
+.mf-popmenu-field::placeholder { color: var(--mf-text-tertiary); opacity: 1; }
+.mf-popmenu-field::selection { background: var(--mf-text-selection, var(--mf-band)); }
+.mf-popmenu-hint { flex: none; margin-right: 2px; font: 500 12px/16px var(--mf-font); color: var(--mf-text-tertiary); white-space: nowrap; }
+.mf-popmenu-clear.mf-icon-button { color: var(--mf-text-tertiary); cursor: default; }
+.mf-popmenu-filter.mf-icon-button { width: 26px; height: 26px; border-radius: 7px; margin-left: 4px; cursor: default; }
+.mf-popmenu-filter.mf-icon-button.mf-shown { background: var(--mf-hover); }
+.mf-popmenu-filter.mf-icon-button.mf-on { color: var(--mf-accent); }
+.mf-popmenu-chips { flex: none; height: 34px; display: flex; align-items: flex-start; gap: 6px; padding: 5px 12px 0 12px; overflow: hidden; }
+.mf-popmenu-scroll { flex: 1 1 auto; min-height: 0; margin-bottom: 4px; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; }
+.mf-popmenu-list { position: relative; padding: 2px 0; }
+.mf-popmenu-empty { height: 60px; padding-top: 20px; box-sizing: border-box; text-align: center; font: 12px/15px var(--mf-font); color: var(--mf-text-secondary); }
+.mf-popmenu-list.mf-is-empty { padding: 0; }
+.mf-popmenu-rule { height: 9px; position: relative; }
+.mf-popmenu-rule::before { content: ""; position: absolute; left: 12px; right: 12px; top: 4px; height: 1px; background: var(--mf-divider); }
+.mf-popmenu-header {
+  box-sizing: border-box; height: 26px; padding: 8px 16px 0 16px;
+  font: 600 11px/14px var(--mf-font); color: var(--mf-text-secondary);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.mf-popmenu-row { position: relative; height: 32px; }
+.mf-popmenu-row.mf-two-lines { height: 44px; }
+/* The chosen row's band: the pointer's, or the keys'. */
+.mf-popmenu-row.mf-chosen::before {
+  content: ""; position: absolute; left: 6px; right: 6px; top: 1px; bottom: 1px;
+  border-radius: 7px; background: var(--mf-accent);
+}
+.mf-popmenu-icon {
+  position: absolute; left: 16px; top: 8px; width: 16px; height: 16px;
+  display: flex; align-items: center; justify-content: center; color: var(--mf-text-secondary);
+}
+.mf-popmenu-icon img { width: 16px; height: 16px; display: block; border-radius: 3px; object-fit: cover; pointer-events: none; }
+.mf-popmenu-line {
+  position: absolute; left: 42px; right: 16px; top: 0; height: 32px;
+  display: flex; align-items: center; gap: 8px;
+}
+.mf-popmenu-title {
+  flex: 1 1 auto; min-width: 0; position: relative; top: 0.5px;
+  font: 13px/17px var(--mf-font); color: var(--mf-text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.mf-popmenu-row.mf-dimmed .mf-popmenu-title { color: var(--mf-text-secondary); }
+.mf-popmenu-trailing { flex: none; font: 11.5px/15px var(--mf-font); color: var(--mf-text-tertiary); white-space: nowrap; }
+.mf-popmenu-chevron { flex: none; display: flex; align-items: center; color: var(--mf-text-tertiary); }
+.mf-popmenu-subtitle {
+  position: absolute; left: 42px; right: 16px; top: 24px; height: 15px;
+  font: 11.5px/15px var(--mf-font); color: var(--mf-text-secondary);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.mf-popmenu-row.mf-chosen .mf-popmenu-icon,
+.mf-popmenu-row.mf-chosen .mf-popmenu-title { color: #fff; }
+.mf-popmenu-row.mf-chosen .mf-popmenu-trailing,
+.mf-popmenu-row.mf-chosen .mf-popmenu-chevron,
+.mf-popmenu-row.mf-chosen .mf-popmenu-subtitle { color: rgba(255, 255, 255, 0.75); }

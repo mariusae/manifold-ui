@@ -1,0 +1,178 @@
+/* manifold-ui — the flat controls (Manifold's Flat.swift).
+ *
+ * One style throughout: capsules on a faint grey with no line round them
+ * (buttons, chips, segments), a hairline on a faint fill for what is typed
+ * or ticked (fields, checkboxes), the accent only for the primary button,
+ * a ticked box and a slider's filled part. State changes are instant.
+ *
+ * Capsule grounds, by stand: rest --mf-ground-rest, hover --mf-hover,
+ * pressed --mf-pressed, on --mf-ground-on. Disabled: the whole control at
+ * 0.4 alpha.
+ */
+
+/* --------------------------------------------------------------- button */
+
+.mf-button {
+  appearance: none; -webkit-appearance: none; margin: 0; box-sizing: border-box;
+  /* The capsule is drawn half a point inside its frame. */
+  border: 0; clip-path: inset(0.5px round 11.5px);
+  height: 24px; padding: 0 10px; border-radius: 12px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+  flex: none; min-width: 0; max-width: 100%; overflow: hidden;
+  font: 12px/1 var(--mf-font); color: var(--mf-text); white-space: nowrap;
+  background-color: var(--mf-ground-rest);
+  cursor: default; outline: none;
+  user-select: none; -webkit-user-select: none;
+}
+.mf-button.mf-symbol-only { padding: 0 6px; }
+.mf-button:hover { background-color: var(--mf-hover); }
+.mf-button:hover:active { background-color: var(--mf-pressed); }
+.mf-button.mf-on, .mf-button.mf-on:hover, .mf-button.mf-on:hover:active { background-color: var(--mf-ground-on); }
+.mf-button:focus-visible { box-shadow: inset 0 0 0 2px var(--mf-accent-soft); }
+.mf-button:disabled, .mf-button.mf-disabled { opacity: 0.4; pointer-events: none; }
+.mf-button-title { min-width: 0; overflow: hidden; text-overflow: ellipsis; line-height: 16px; }
+.mf-button-symbol { display: flex; flex: none; }
+.mf-button.mf-spins .mf-button-symbol { animation: mf-button-spin 1s linear infinite; }
+@keyframes mf-button-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .mf-button.mf-spins .mf-button-symbol { animation: none; } }
+
+.mf-button[hidden], .mf-chip[hidden], .mf-field[hidden], .mf-segments[hidden], .mf-checkbox[hidden], .mf-slider[hidden] { display: none !important; }
+
+/* The thing to do: filled in the accent, darker under the pointer and pressed. */
+.mf-button-primary { color: #fff; background-color: var(--mf-accent-fill); }
+.mf-button-primary:hover { background-color: color-mix(in srgb, var(--mf-accent-fill) 90%, black); }
+.mf-button-primary:hover:active { background-color: color-mix(in srgb, var(--mf-accent-fill) 80%, black); }
+
+/* ----------------------------------------------------------------- chip */
+
+.mf-chip {
+  appearance: none; -webkit-appearance: none; margin: 0; box-sizing: border-box;
+  border: 0; clip-path: inset(0.5px round 11.5px);
+  height: 24px; padding: 0 10px; border-radius: 12px; flex: none;
+  display: inline-flex; align-items: center; justify-content: center;
+  font: 500 12px/16px var(--mf-font); color: var(--mf-text-secondary); white-space: nowrap;
+  background-color: var(--mf-ground-rest);
+  cursor: pointer; outline: none;
+  user-select: none; -webkit-user-select: none;
+}
+.mf-chip:hover { background-color: var(--mf-hover); }
+.mf-chip.mf-on, .mf-chip.mf-on:hover { background-color: var(--mf-ground-on); color: var(--mf-text); }
+.mf-chip:focus-visible { box-shadow: inset 0 0 0 2px var(--mf-accent-soft); }
+.mf-chip:disabled { opacity: 0.4; pointer-events: none; }
+.mf-chip-group { display: inline-flex; align-items: center; gap: 6px; flex: none; }
+
+/* ---------------------------------------------------------------- field */
+
+.mf-field {
+  position: relative; box-sizing: border-box; flex: none;
+  display: flex; align-items: center;
+  width: 160px; height: 28px; padding: 0 8px 0 27px; border-radius: 7px;
+  background: var(--mf-fill);
+  box-shadow: inset 0 0 0 1px var(--mf-line);
+  cursor: text;
+}
+.mf-field:focus-within { box-shadow: inset 0 0 0 1px var(--mf-accent-strong); }
+.mf-field.mf-no-glyph { padding-left: 8px; }
+.mf-field.mf-has-text { padding-right: 26px; }
+.mf-field-glyph {
+  position: absolute; left: 7px; top: 0; width: 16px; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--mf-text-secondary); pointer-events: none;
+}
+.mf-field-input {
+  appearance: none; -webkit-appearance: none; box-sizing: border-box;
+  flex: 1; min-width: 0; height: 20px; margin: 0; padding: 0; border: 0; outline: 0; background: none;
+  font: 13px/20px var(--mf-font); color: var(--mf-text); caret-color: var(--mf-caret, var(--mf-accent));
+  user-select: text; -webkit-user-select: text; cursor: text;
+}
+.mf-field-input::placeholder { color: var(--mf-text-tertiary); opacity: 1; }
+.mf-field-input::selection { background: var(--mf-text-selection, var(--mf-band)); }
+.mf-field-input::-webkit-search-cancel-button { display: none; }
+.mf-field-clear {
+  appearance: none; -webkit-appearance: none; border: 0; padding: 0; margin: 0; background: none;
+  position: absolute; right: 4px; top: 50%; width: 20px; height: 20px; margin-top: -10px;
+  display: none; align-items: center; justify-content: center;
+  color: var(--mf-text-secondary); cursor: default; outline: none;
+}
+.mf-field.mf-has-text .mf-field-clear { display: flex; }
+.mf-field-clear:hover:active { opacity: 0.6; }
+.mf-field.mf-disabled { opacity: 0.4; pointer-events: none; }
+
+/* ------------------------------------------------------------- segments */
+
+.mf-segments {
+  position: relative; display: inline-flex; align-items: center; gap: 2px;
+  height: 24px; flex: none;
+  font: 12px/16px var(--mf-font);
+  user-select: none; -webkit-user-select: none; cursor: default;
+}
+.mf-segment {
+  appearance: none; -webkit-appearance: none; border: 0; margin: 0; background: none; box-sizing: border-box;
+  position: relative; z-index: 1; flex: none;
+  height: 24px; padding: 0 9px; border-radius: 12px;
+  font: inherit; color: var(--mf-text-secondary); white-space: nowrap;
+  cursor: default; outline: none;
+}
+.mf-segment.mf-symbol { width: 28px; padding: 0; }
+/* Its width is its word's in the regular weight; chosen, the word is drawn
+   medium over the same room, about its middle. */
+.mf-segment-size { visibility: hidden; }
+.mf-segment-label { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+.mf-segment:hover { background: var(--mf-hover); }
+.mf-segment.mf-on { background: var(--mf-ground-on); color: var(--mf-text); font-weight: 500; }
+.mf-segment:focus-visible { box-shadow: inset 0 0 0 2px var(--mf-accent-soft); }
+/* The chosen capsule on its way from one segment to another. */
+.mf-segments-band {
+  position: absolute; top: 0; height: 24px; border-radius: 12px; z-index: 0;
+  background: var(--mf-ground-on); pointer-events: none; display: none;
+}
+.mf-segments.mf-gliding .mf-segments-band { display: block; }
+.mf-segments.mf-gliding .mf-segment.mf-on { background: none; }
+.mf-segments.mf-disabled { opacity: 0.4; pointer-events: none; }
+
+/* ------------------------------------------------------------- checkbox */
+
+.mf-checkbox {
+  display: inline-flex; align-items: center; gap: 7px; flex: none;
+  min-height: 16px; padding-left: 1px;
+  font: 13px/17px var(--mf-font); color: var(--mf-text);
+  cursor: default; outline: none;
+  user-select: none; -webkit-user-select: none;
+}
+.mf-checkbox-box {
+  box-sizing: border-box; flex: none; width: 14px; height: 14px; border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--mf-fill);
+  box-shadow: inset 0 0 0 1px var(--mf-edge-control);
+  color: #fff;
+}
+.mf-checkbox-box .mf-icon { display: none; }
+.mf-checkbox.mf-on .mf-checkbox-box { background: var(--mf-accent-fill); box-shadow: none; }
+.mf-checkbox.mf-on .mf-checkbox-box .mf-icon { display: block; }
+.mf-checkbox:focus-visible .mf-checkbox-box { outline: 2px solid var(--mf-accent-soft); outline-offset: 1px; }
+.mf-checkbox.mf-disabled { color: var(--mf-text-tertiary); pointer-events: none; }
+
+/* --------------------------------------------------------------- slider */
+
+.mf-slider {
+  position: relative; box-sizing: border-box; flex: none;
+  width: 160px; min-width: 40px; height: 17px;
+  cursor: default; outline: none; touch-action: none;
+  --mf-slider-at: 0;
+}
+/* From the knob's centre at one end to its centre at the other. */
+.mf-slider-track {
+  position: absolute; left: 6.5px; right: 6.5px; top: 50%; height: 3px; margin-top: -1.5px;
+  border-radius: 1.5px; background: color-mix(in srgb, var(--mf-text) 12%, transparent);
+}
+.mf-slider-fill {
+  position: absolute; left: 0; top: 0; height: 100%; width: calc(var(--mf-slider-at) * 100%);
+  border-radius: 1.5px; background: var(--mf-accent);
+}
+.mf-slider-knob {
+  position: absolute; top: 50%; left: calc(var(--mf-slider-at) * (100% - 13px));
+  box-sizing: border-box; width: 13px; height: 13px; margin-top: -6.5px; border-radius: 50%;
+  background: var(--mf-panel); border: 1px solid var(--mf-edge-control);
+}
+.mf-slider:focus-visible .mf-slider-knob { outline: 2px solid var(--mf-accent-soft); outline-offset: 1px; }
+.mf-slider.mf-disabled { opacity: 0.4; pointer-events: none; }

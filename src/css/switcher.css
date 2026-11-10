@@ -1,0 +1,123 @@
+/* Spaces as cards (⌘`'s switcher, a space's peek) and Overview (⌘').
+ * Every colour is the theme's; a card's own is `--mf-space-color`, set on it. */
+
+/* ------------------------------------------------------- a space's card */
+
+.mf-space-card {
+  position: absolute; width: 236px; height: 176px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--mf-text) 4%, transparent);
+  color: var(--mf-text);
+  cursor: pointer;
+}
+/* Chosen: a band of the space's own colour under it, and a ring of it on its outline. */
+.mf-space-card.mf-chosen {
+  background: color-mix(in srgb, var(--mf-space-color) 22%, transparent);
+  outline: 2px solid color-mix(in srgb, var(--mf-space-color) 85%, transparent);
+  outline-offset: -1px;
+}
+.mf-space-square {
+  position: absolute; left: 10px; top: 10px; width: 20px; height: 20px; border-radius: 5px;
+  display: flex; align-items: center; justify-content: center;
+  background: color-mix(in srgb, var(--mf-space-color) 30%, transparent);
+  color: color-mix(in srgb, var(--mf-space-color) 75%, var(--mf-text));
+}
+.mf-space-letter { font: 700 9.5px/1 var(--mf-font); white-space: nowrap; }
+.mf-space-name {
+  position: absolute; left: 38px; right: 10px; top: 11px; height: 17px;
+  font: 600 13px/17px var(--mf-font); color: var(--mf-text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.mf-space-name.mf-with-status { right: 24px; }
+.mf-space-status { position: absolute; right: 10px; top: 16px; width: 8px; height: 8px; border-radius: 50%; }
+.mf-space-status-needsYou { background: var(--mf-status-attention); }
+.mf-space-status-failed { background: var(--mf-status-failed); }
+.mf-space-status-done { background: var(--mf-status-done); }
+.mf-space-status-working { background: var(--mf-accent-text); }
+.mf-space-footer {
+  position: absolute; left: 10px; width: 216px; height: 14px;
+  font: 400 11px/14px var(--mf-font); color: var(--mf-text-secondary);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* Its grid, in miniature. */
+.mf-space-map { position: absolute; left: 10px; top: 38px; width: 216px; }
+.mf-space-map.mf-empty-space {
+  border-radius: 6px; background: color-mix(in srgb, var(--mf-text) 4%, transparent);
+  display: flex; align-items: center; justify-content: center;
+  font: 400 11px/14px var(--mf-font); color: var(--mf-text-tertiary);
+}
+.mf-space-tile {
+  position: absolute; border-radius: 4px; overflow: hidden;
+  background: var(--mf-panel); color: var(--mf-text-secondary);
+}
+.mf-space-tile-bar { position: absolute; left: 0; right: 0; top: 0; background: color-mix(in srgb, var(--mf-text) 5%, transparent); }
+.mf-space-tile-body { position: absolute; left: 0; right: 0; bottom: 0; }
+.mf-space-tile-body img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: left top; opacity: 0.95; }
+.mf-space-tile-mark { display: flex; align-items: center; justify-content: center; color: var(--mf-text-tertiary); }
+.mf-space-tile-symbol { position: absolute; left: 4px; top: 0; display: flex; align-items: center; }
+.mf-space-tile-title {
+  position: absolute; left: 14px; top: 1px; height: 10px;
+  font: 500 7.5px/10px var(--mf-font);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+/* The focused tile ringed; else one that stands some way, in that tone (the line centred on its edge). */
+.mf-space-tile.mf-focused { outline: 1.5px solid color-mix(in srgb, var(--mf-accent) 80%, transparent); outline-offset: -0.75px; }
+.mf-space-tile.mf-tone-attention { outline: 1px solid var(--mf-status-attention); outline-offset: -0.5px; }
+.mf-space-tile.mf-tone-failed { outline: 1px solid var(--mf-status-failed); outline-offset: -0.5px; }
+.mf-space-tile.mf-tone-done { outline: 1px solid var(--mf-status-done); outline-offset: -0.5px; }
+.mf-space-tile.mf-tone-running { outline: 1px solid var(--mf-accent-text); outline-offset: -0.5px; }
+
+/* One card alone, in the popover look: what a space's square shows under a resting pointer. */
+.mf-space-peek { position: absolute; z-index: 70; width: 272px; height: 212px; }
+.mf-space-peek .mf-space-card { left: 18px; top: 18px; cursor: default; }
+
+/* ------------------------------------------------- ⌘`: the spaces' cards */
+
+.mf-space-switcher { position: absolute; z-index: 80; cursor: pointer; }
+
+/* ------------------------------------------------------------- Overview */
+
+.mf-overview { position: absolute; inset: 0; z-index: 30; overflow: hidden; outline: none; }
+.mf-overview-header {
+  position: absolute; left: 0; right: 0; top: 0; height: 44px; z-index: 1;
+  display: flex; align-items: center; padding: 0 16px;
+}
+.mf-overview-title {
+  flex: none; max-width: calc(50% + 16px);
+  font: 600 15px/20px var(--mf-font); color: var(--mf-text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.mf-overview-count {
+  margin-left: 10px; min-width: 0;
+  font: 400 12px/16px var(--mf-font); color: var(--mf-text-secondary);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.mf-overview-spring { flex: 1; min-width: 16px; }
+.mf-overview-modes { flex: none; margin-right: 12px; }
+.mf-overview-close { flex: none; }
+
+.mf-overview-scroll { position: absolute; left: 0; right: 0; top: 44px; bottom: 0; overflow-x: hidden; overflow-y: auto; }
+.mf-overview-canvas { position: relative; width: 100%; }
+/* Tiles becoming their cells: over the header and out of the scrolling part's clip, on the way. */
+.mf-overview.mf-morphing .mf-overview-scroll { overflow: visible; z-index: 2; }
+.mf-overview-flights { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
+
+/* A cell: the tile itself, its bar over its content, as the grid has a card. */
+.mf-overview-cell {
+  position: absolute; overflow: hidden;
+  border-radius: var(--mf-radius-surface);
+  background: var(--mf-tile-ground);
+  box-shadow: var(--mf-tile-shadow);
+}
+.mf-overview-cell[hidden] { display: none; }
+.mf-overview-cell.mf-flying { z-index: 40; }
+.mf-overview-inner { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+.mf-overview-body { right: 0; bottom: 0; border-radius: 0 0 var(--mf-radius-surface) var(--mf-radius-surface); }
+/* Its bar opens it; nothing's dragged from here. */
+.mf-overview .mf-bar { cursor: default; }
+
+/* A summary card in a cell: the card's own ground, edge and shadow — the cell's only while it flies. */
+.mf-overview-card { overflow: visible; background: none; box-shadow: none; }
+.mf-overview-card.mf-flying { overflow: hidden; background: var(--mf-stack); box-shadow: var(--mf-shadow-resting); }
+.mf-overview-card .mf-summary { width: 100%; height: 100%; }

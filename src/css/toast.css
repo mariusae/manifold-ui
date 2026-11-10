@@ -1,0 +1,55 @@
+/* manifold-ui — toasts (ToastView.swift; overlay/toast.js).
+ *
+ * A floating panel (.mf-float) 32 high, one line: its words, and one action
+ * (a flat button) or — with none — a × that shows under the pointer. With
+ * a countdown, the time left is a shading behind its words, drawing back
+ * from the right. One at the window's foot (14 above it, centred in the
+ * stage); in the sidebar's foot, a stack of them, each as wide as it.
+ */
+
+/* Where the window's toast stands: across the stage's foot, taking no presses itself. */
+.mf-toast-dock {
+  position: absolute; left: 8px; right: 8px; bottom: 14px; z-index: 50;
+  display: flex; justify-content: center; pointer-events: none;
+}
+.mf-toast {
+  position: relative; box-sizing: border-box; flex: none; max-width: 100%;
+  height: 32px; padding: 0 4px 0 12px;
+  display: flex; align-items: center;
+  font: 12px/17px var(--mf-font); color: var(--mf-text);
+  pointer-events: auto; cursor: default;
+}
+.mf-toast[hidden], .mf-toast [hidden] { display: none !important; }
+.mf-toast.mf-no-action { padding-right: 0; }
+.mf-toast-label {
+  position: relative; flex: 0 1 auto; min-width: 0; max-width: 554px; margin-right: 4px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.mf-toast > .mf-button { position: relative; margin-left: 8px; }
+
+/* The time left, under its words and its action. */
+.mf-toast-track { position: absolute; inset: 0; border-radius: inherit; overflow: hidden; pointer-events: none; }
+.mf-toast-track[hidden] { display: none; }
+.mf-toast-bar {
+  position: absolute; inset: 0; transform-origin: 0 50%; transform: scaleX(0.0001);
+  background: color-mix(in srgb, var(--mf-text) 10%, transparent);
+}
+
+/* Put away now, under the pointer: only for one with nothing to do. */
+.mf-toast-dismiss.mf-icon-button {
+  position: absolute; right: 6px; top: 6px; display: none;
+  opacity: 0; transition: opacity 0.25s;
+}
+.mf-toast.mf-no-action .mf-toast-dismiss.mf-icon-button { display: inline-flex; }
+.mf-toast.mf-no-action:hover .mf-toast-dismiss.mf-icon-button { opacity: 1; }
+/* At the window's foot its words run their whole length; the × comes over their end. */
+.mf-toast.mf-no-action:not(.mf-compact):hover .mf-toast-label {
+  -webkit-mask-image: linear-gradient(to left, transparent 24px, #000 36px);
+  mask-image: linear-gradient(to left, transparent 24px, #000 36px);
+}
+
+/* In the sidebar's foot: as wide as it, its words cut short at their end. */
+.mf-toast-stack { display: flex; flex-direction: column; gap: 6px; }
+.mf-toast.mf-compact { width: 100%; }
+.mf-toast.mf-compact .mf-toast-label { flex: 1 1 auto; max-width: none; }
+.mf-toast.mf-compact.mf-no-action .mf-toast-label { margin-right: 32px; }

@@ -1,0 +1,308 @@
+/* The sidebar (sidebar/sidebar.js), in Manifold's measures (SidebarView,
+ * SpaceStrip, OrganizationView, NeedsYouView, SidebarFooter): a header of
+ * 40, the strip of squares, 12 of air, the space's name and host, the rows
+ * from 4 in to 4 from the edge, and — from the bottom up — the footer (38),
+ * "Needs you", the toasts. One margin for everything: 20.
+ *
+ * A label's frame is given as AppKit lays it; its words start 2 inside
+ * (padding-left: 2px) and sit at the frame's top (a line as high as the
+ * font's own, in a taller box). */
+
+.mf-sidebar {
+  position: absolute; inset: 0;
+  overflow: hidden;
+  border-radius: var(--mf-radius-surface);
+  display: flex; flex-direction: column;
+  font: 13px/16px var(--mf-font);
+  color: var(--mf-text);
+  cursor: default;
+}
+
+/* --------------------------------------------------------------- header */
+
+.mf-sidebar-header { position: relative; flex: none; height: 40px; }
+.mf-sidebar-pin { position: absolute; right: 10px; top: 10px; }
+.mf-sidebar-pin.mf-pinned { color: var(--mf-text); }
+
+/* Tabs of 26, 2 apart, the last ending 6 before the pin button. */
+.mf-sidebar-tabs { position: absolute; right: 36px; top: 7px; display: flex; gap: 2px; }
+.mf-sidebar-tab {
+  appearance: none; border: 0; padding: 0; margin: 0; background: none; font: inherit;
+  position: relative; flex: none; width: 26px; height: 26px;
+  border-radius: var(--mf-radius-control);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--mf-text-secondary); cursor: pointer;
+}
+.mf-sidebar-tab:hover { background: var(--mf-hover); }
+.mf-sidebar-tab.mf-chosen { background: var(--mf-band-inactive); color: var(--mf-text); }
+.mf-sidebar-tab-badge {
+  position: absolute; right: -3px; top: -2px;
+  height: 12px; min-width: 12px; padding: 0 2px; border-radius: 6px;
+  background: var(--mf-line); color: var(--mf-text);
+  font: 700 9px/12px var(--mf-font); font-variant-numeric: tabular-nums; text-align: center;
+  pointer-events: none;
+}
+
+/* ---------------------------------------------------------------- strip */
+
+.mf-sidebar-strip { position: relative; flex: none; height: 36px; cursor: pointer; }
+.mf-sidebar-strip.mf-reordering { cursor: grabbing; }
+
+.mf-strip-square, .mf-strip-plus {
+  position: absolute; left: 20px; top: 6px; width: 24px; height: 24px;
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+}
+.mf-strip-square { --c: var(--mf-text-secondary); background: color-mix(in srgb, var(--c) 18%, transparent); }
+.mf-strip-square.mf-hovered, .mf-strip-square.mf-drop { background: color-mix(in srgb, var(--c) 26%, transparent); }
+.mf-strip-square.mf-current { background: color-mix(in srgb, var(--c) 32%, transparent); }
+.mf-strip-square.mf-lit { background: color-mix(in srgb, var(--c) 60%, transparent); }
+/* The current space's ring: 1.5 on the square grown by 2. A drop's: 2, in the accent, grown by 2.5. */
+.mf-strip-square.mf-current::before, .mf-strip-square.mf-drop::before {
+  content: ""; position: absolute; pointer-events: none;
+  inset: -2.75px; border-radius: 8.75px;
+  border: 1.5px solid color-mix(in srgb, var(--c) 85%, transparent);
+}
+.mf-strip-square.mf-drop::before { inset: -3.5px; border-radius: 9px; border: 2px solid var(--mf-accent); }
+.mf-strip-glyph {
+  display: flex; align-items: center; justify-content: center;
+  color: color-mix(in srgb, var(--c) 75%, var(--mf-text));
+  font: 600 11.5px/14px var(--mf-font);
+}
+/* What most wants you there: 7 across, overhanging the corner by 2, haloed to 10. */
+.mf-strip-dot {
+  position: absolute; left: 19px; top: -2px; width: 7px; height: 7px; border-radius: 50%;
+  box-shadow: 0 0 0 1.5px var(--mf-panel);
+  background: var(--mf-text-secondary);
+}
+.mf-strip-dot[data-status="needsYou"] { background: var(--mf-status-attention); }
+.mf-strip-dot[data-status="failed"] { background: var(--mf-status-failed); }
+.mf-strip-dot[data-status="done"] { background: var(--mf-status-done); }
+.mf-strip-dot[data-status="working"] { background: var(--mf-accent-text); }
+.mf-strip-number {
+  position: absolute; left: 15px; top: 15px;
+  height: 13px; min-width: 13px; padding: 0 3px; border-radius: 6.5px;
+  background: color-mix(in srgb, var(--mf-text) 85%, transparent); color: var(--mf-panel);
+  font: 700 9px/13px var(--mf-font); font-variant-numeric: tabular-nums; text-align: center;
+  display: none;
+}
+.mf-sidebar-strip.mf-numbers .mf-strip-number:not(.mf-none) { display: block; }
+
+.mf-strip-plus { color: var(--mf-text-secondary); }
+.mf-strip-plus-edge { position: absolute; left: 0; top: 0; stroke: color-mix(in srgb, var(--mf-text) 16%, transparent); }
+.mf-strip-plus.mf-hovered { background: var(--mf-hover); color: var(--mf-text); }
+.mf-strip-plus.mf-hovered .mf-strip-plus-edge { stroke: color-mix(in srgb, var(--mf-text) 30%, transparent); }
+
+/* A square being moved: lifted under the pointer on the panel's own ground, its slot hollow. */
+.mf-strip-lift {
+  position: absolute; left: 0; top: 0; width: 24px; height: 24px; z-index: 2;
+  border-radius: 6px; background: var(--mf-panel);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  pointer-events: none;
+}
+.mf-strip-square.mf-hollow { background: none; }
+.mf-strip-square.mf-hollow > *, .mf-strip-square.mf-hollow::before { display: none; }
+.mf-strip-square.mf-hollow::after {
+  content: ""; position: absolute; inset: 0.5px; border-radius: 6px;
+  background: var(--mf-ground-rest);
+}
+
+.mf-sidebar-peek { position: fixed; left: 0; top: 0; z-index: 1000; pointer-events: none; }
+
+/* ------------------------------------------- the space's name and host */
+
+.mf-sidebar-body { position: relative; flex: 1 1 0; min-height: 0; }
+.mf-sidebar-page { position: absolute; inset: 0; display: flex; flex-direction: column; }
+.mf-sidebar-ghost { pointer-events: none; }
+
+.mf-sidebar-head { position: relative; flex: none; height: 60px; }
+.mf-sidebar-name {
+  position: absolute; left: 20px; right: 10px; top: 14px; height: 18px; padding-left: 2px;
+  font-weight: 600;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.mf-sidebar-hostline { position: absolute; left: 20px; right: 10px; top: 36px; height: 18px; }
+.mf-sidebar-host { display: inline-flex; align-items: flex-start; max-width: 100%; height: 18px; color: var(--mf-text-secondary); }
+.mf-sidebar-host-icon { flex: none; width: 16px; height: 14px; margin-top: 2px; display: flex; align-items: center; justify-content: center; }
+.mf-sidebar-host-label { min-width: 0; margin-left: 4px; padding-left: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mf-sidebar-host.mf-attention .mf-sidebar-host-label { color: var(--mf-status-attention); }
+
+/* A list pushed over the space's: a way back, its title, how many. */
+.mf-sidebar-pushed { position: relative; flex: none; height: 54px; }
+.mf-sidebar-back { position: absolute; left: 12px; top: 18px; width: 24px; height: 24px; }
+.mf-sidebar-pushed-title {
+  position: absolute; left: 44px; right: 10px; top: 13px; height: 18px; padding-left: 2px;
+  font: 700 15px/18px var(--mf-font);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.mf-sidebar-pushed-subtitle {
+  position: absolute; left: 44px; right: 10px; top: 32px; height: 14px; padding-left: 2px;
+  font: 400 11.5px/14px var(--mf-font); color: var(--mf-text-secondary);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* ----------------------------------------------------------------- rows */
+
+.mf-sidebar-listwrap { position: relative; flex: 1 1 0; min-height: 0; margin: 0 4px; }
+.mf-sidebar-list {
+  position: absolute; inset: 0;
+  overflow-x: hidden; overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+.mf-sidebar-list::-webkit-scrollbar { display: none; }
+.mf-sidebar-thumb {
+  position: absolute; right: 1px; top: 0; width: 6px; border-radius: 3px;
+  background: color-mix(in srgb, var(--mf-text) 40%, transparent);
+  opacity: 0; transition: opacity 0.25s;
+  pointer-events: none;
+}
+.mf-sidebar-thumb.mf-on { opacity: 1; transition: none; }
+
+.mf-sidebar-row { position: relative; height: 26px; isolation: isolate; }
+.mf-sidebar-row.mf-two-line { height: 40px; }
+
+/* The band: the row less 6 at each side and 1 above and below. */
+.mf-sidebar-band { position: absolute; z-index: -1; left: 6px; right: 6px; top: 1px; bottom: 1px; border-radius: 6px; pointer-events: none; }
+.mf-sidebar-row.mf-hovered > .mf-sidebar-band { background: var(--mf-hover); }
+.mf-sidebar-row.mf-selected > .mf-sidebar-band { background: var(--mf-band-inactive); }
+.mf-sidebar-row.mf-drop-on > .mf-sidebar-band { background: var(--mf-drop); box-shadow: inset 0 0 0 1.5px var(--mf-accent-strong); }
+.mf-sidebar-landing {
+  position: absolute; z-index: -1; left: 4px; right: 4px; top: 1px; bottom: 1px; border-radius: 6px;
+  background: var(--mf-accent); opacity: 0; pointer-events: none;
+}
+
+/* A tile's row, or an action's: icon at 20, name from 40, and from the
+ * right edge (22 in) leftward the buttons, a pill, a glyph, an age — each
+ * with the gap the name's line gives it; the name takes what is left. */
+.mf-sidebar-item { display: flex; align-items: flex-start; padding: 0 18px 0 36px; }
+.mf-sidebar-row-icon {
+  position: absolute; left: 16px; top: 6px; width: 16px; height: 14px;
+  color: var(--mf-text-secondary);
+}
+.mf-two-line > .mf-sidebar-row-icon { top: 5px; }
+.mf-selected > .mf-sidebar-row-icon { color: var(--mf-text); }
+.mf-sidebar-row-symbol { width: 16px; height: 14px; display: flex; align-items: center; justify-content: center; }
+.mf-dimmed .mf-sidebar-row-symbol, .mf-sidebar-action .mf-sidebar-row-symbol { opacity: 0.6; }
+.mf-sidebar-row-badge {
+  position: absolute; left: 10px; top: 7px; width: 10px; height: 10px; border-radius: 5px;
+  background: var(--mf-panel); color: var(--mf-text-secondary);
+  display: flex; align-items: center; justify-content: center;
+}
+.mf-sidebar-row-name {
+  flex: 1 1 0; min-width: 0; height: 17px; margin-top: 4.5px; padding-left: 2px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.mf-two-line > .mf-sidebar-row-name { margin-top: 4px; }
+.mf-selected > .mf-sidebar-row-name { font-weight: 600; }
+.mf-docked > .mf-sidebar-row-name, .mf-dimmed > .mf-sidebar-row-name, .mf-inactive > .mf-sidebar-row-name,
+.mf-sidebar-action > .mf-sidebar-row-name { color: var(--mf-text-secondary); }
+.mf-still > .mf-sidebar-row-name { opacity: 0.75; }
+.mf-sidebar-row-dot { color: var(--mf-text-secondary); }
+.mf-sidebar-row-dot.mf-stale { color: var(--mf-status-attention); }
+
+.mf-sidebar-row-age {
+  flex: none; height: 15px; margin: 6px 0 0 8px; padding-left: 2px;
+  font: 400 11px/14px var(--mf-font); font-variant-numeric: tabular-nums;
+  color: var(--mf-text-secondary); white-space: nowrap; text-align: right;
+}
+.mf-two-line > .mf-sidebar-row-age { margin-top: 5.5px; }
+.mf-sidebar-row-glyph { flex: none; width: 13px; height: 13px; margin: 6.5px 2px 0 6px; color: var(--mf-text); }
+.mf-two-line > .mf-sidebar-row-glyph { margin-top: 6px; }
+.mf-sidebar-item > .mf-status-pill, .mf-sidebar-item > .mf-pill { margin: 5px 1px 0 6px; }
+.mf-two-line > .mf-status-pill, .mf-two-line > .mf-pill { margin-top: 4.5px; }
+/* The buttons, under the pointer only: 20 each at a pitch of 22 from the edge, and 2 more before
+ * them — so two move what's at the name's right 46 to the left. */
+.mf-sidebar-row-buttons { display: none; flex: none; gap: 2px; margin: 3px 0 0 4px; }
+.mf-two-line > .mf-sidebar-row-buttons { margin-top: 2px; }
+.mf-hovered.mf-has-buttons > .mf-sidebar-row-buttons { display: flex; }
+.mf-hovered.mf-has-buttons > .mf-pill { display: none; }
+
+.mf-sidebar-row-detail {
+  position: absolute; left: 36px; right: 20px; top: 22px; height: 15px; padding-left: 2px;
+  font: 400 11px/14px var(--mf-font); color: var(--mf-text-secondary);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.mf-maximized > .mf-sidebar-row-detail { left: 52px; }
+.mf-sidebar-row-max {
+  position: absolute; left: 36px; top: 23.5px; width: 13px; height: 12px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--mf-text-secondary);
+}
+
+/* A label — Pinned, On Screen, Docked: low in its 34, with a count at the right edge. */
+.mf-sidebar-section { height: 34px; }
+.mf-sidebar-section-title {
+  position: absolute; left: 16px; top: 13.5px; height: 15px; max-width: calc(100% - 80px); padding: 0 2px;
+  font: 600 11px/14px var(--mf-font); color: var(--mf-text-secondary);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.mf-sidebar-section > .mf-pill { position: absolute; right: 18px; top: 13px; }
+
+/* A hairline between columns, from where names start. */
+.mf-sidebar-divider { height: 9px; }
+.mf-sidebar-divider::before {
+  content: ""; position: absolute; left: 36px; right: 18px; top: 3px; height: 1px;
+  background: var(--mf-divider);
+}
+
+/* ---------------------------------------------------- the bottom stack */
+
+.mf-sidebar-toasts { position: relative; flex: none; margin: 0 8px 8px; }
+.mf-sidebar-toasts:empty { display: none; }
+
+.mf-sidebar-needs { position: relative; flex: none; margin-top: 4px; padding-bottom: 4px; cursor: pointer; }
+.mf-sidebar-needs::before {
+  content: ""; position: absolute; left: 12px; right: 12px; top: 0; height: 1px;
+  background: var(--mf-divider);
+}
+.mf-sidebar-needs-head { position: relative; height: 22px; }
+.mf-sidebar-needs-title {
+  position: absolute; left: 22px; top: 5px;
+  font: 600 11px/14px var(--mf-font); color: var(--mf-status-attention);
+}
+.mf-sidebar-needs-count {
+  position: absolute; right: 18px; top: 6px;
+  font: 500 10.5px/13px var(--mf-font); font-variant-numeric: tabular-nums; color: var(--mf-text-secondary);
+}
+.mf-sidebar-needs-row {
+  position: relative; height: 24px; margin: 0 6px; padding: 0 6px 0 58px; border-radius: 6px;
+  display: flex; align-items: center;
+}
+.mf-sidebar-needs-row:hover { background: var(--mf-hover); }
+.mf-sidebar-needs-square {
+  position: absolute; left: 14px; top: 4px; width: 16px; height: 16px; border-radius: 4px;
+  --c: var(--mf-text-secondary);
+  background: color-mix(in srgb, var(--c) 28%, transparent);
+  color: color-mix(in srgb, var(--c) 75%, var(--mf-text));
+  font: 700 8.5px/10px var(--mf-font);
+  display: flex; align-items: center; justify-content: center;
+}
+.mf-sidebar-needs-symbol {
+  position: absolute; left: 38px; top: 5px; width: 14px; height: 14px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--mf-text-secondary);
+}
+.mf-sidebar-needs-name { flex: 1 1 0; min-width: 0; margin-right: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mf-sidebar-needs-more {
+  height: 24px; padding-left: 22px;
+  font: 400 11.5px/24px var(--mf-font); color: var(--mf-text-secondary);
+}
+.mf-sidebar-needs-more:hover { color: var(--mf-text); }
+
+/* --------------------------------------------------------------- footer */
+
+.mf-sidebar-footer { position: relative; flex: none; height: 38px; }
+.mf-sidebar-footer-button {
+  appearance: none; border: 0; margin: 0; background: none;
+  position: absolute; top: 5px; height: 28px; border-radius: 7px;
+  display: flex; align-items: center;
+  font: 500 12px/15px var(--mf-font); color: var(--mf-text-secondary);
+  cursor: pointer;
+}
+.mf-sidebar-footer-button:hover { background: var(--mf-hover); }
+.mf-sidebar-footer-button.mf-open { background: var(--mf-pressed); }
+.mf-footer-left { left: 12px; max-width: calc(100% - 60px); padding: 0 10px 0 8px; gap: 6px; }
+.mf-footer-right { right: 12px; width: 30px; padding: 0; justify-content: center; }
+.mf-sidebar-footer-symbol { flex: none; width: 16px; display: flex; align-items: center; justify-content: center; }
+.mf-sidebar-footer-title { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

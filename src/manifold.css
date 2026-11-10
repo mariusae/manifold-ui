@@ -1,0 +1,384 @@
+/* manifold-ui — the stylesheet.
+ *
+ * Every colour is a custom property set by the theme (theme/theme.js) on
+ * the root element (.mf-root); the measures are Manifold's (Design.swift):
+ * radii hair 1.5, inline 4, control 6, surface 10; motion fast .12s, base
+ * .16s, spatial .24s. One flat style throughout, in the system font.
+ */
+
+@import './css/flat.css';
+@import './css/menus.css';
+@import './css/toast.css';
+@import './css/sidebar.css';
+@import './css/hovercard.css';
+@import './css/scrubber.css';
+@import './css/switcher.css';
+
+.mf-root {
+  --mf-font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
+  --mf-font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --mf-radius-hair: 1.5px;
+  --mf-radius-inline: 4px;
+  --mf-radius-control: 6px;
+  --mf-radius-surface: 10px;
+  --mf-fast: 0.12s;
+  --mf-base: 0.16s;
+  --mf-spatial: 0.24s;
+  --mf-travel: cubic-bezier(0.2, 0.9, 0.3, 1);
+  --mf-settle: cubic-bezier(0.2, 0.9, 0.3, 1.15);
+  --mf-tile-ground: var(--mf-window);
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  font: 13px/1.3 var(--mf-font);
+  color: var(--mf-text);
+  background: var(--mf-window);
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: default;
+  isolation: isolate;
+}
+.mf-root:focus { outline: none; }
+.mf-root *, .mf-root *::before, .mf-root *::after { box-sizing: border-box; }
+.mf-root [hidden] { display: none !important; }
+
+/* The pointer is a closed hand from the moment a drag begins to its end, whatever it was. */
+.mf-root.mf-drag-under-way, .mf-root.mf-drag-under-way * { cursor: grabbing !important; }
+.mf-root.mf-drag-under-way .mf-tile-body, .mf-root .mf-grid.mf-resizing-columns .mf-tile-body, .mf-root .mf-grid.mf-resizing-rows .mf-tile-body { pointer-events: none; }
+.mf-root .mf-grid.mf-resizing-columns, .mf-root .mf-grid.mf-resizing-columns * { cursor: col-resize !important; }
+.mf-root .mf-grid.mf-resizing-rows, .mf-root .mf-grid.mf-resizing-rows * { cursor: row-resize !important; }
+
+/* ------------------------------------------------------------- backdrop */
+
+.mf-backdrop { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+.mf-backdrop canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+
+/* ---------------------------------------------------------------- stage */
+
+.mf-stage { position: absolute; top: 0; bottom: 0; right: 0; left: 0; z-index: 1; overflow: hidden; }
+.mf-stage-slide { position: absolute; inset: 0; }
+
+/* ---------------------------------------------------------------- icons */
+
+.mf-icon { display: block; flex: none; }
+.mf-icon-custom { display: inline-flex; align-items: center; justify-content: center; line-height: 1; }
+.mf-icon-custom svg { width: 100%; height: 100%; }
+.mf-icon-image { border-radius: 3px; object-fit: cover; }
+
+.mf-icon-button {
+  appearance: none; border: 0; padding: 0; margin: 0; background: none;
+  width: 20px; height: 20px; border-radius: var(--mf-radius-control);
+  display: inline-flex; align-items: center; justify-content: center;
+  color: var(--mf-text-secondary); cursor: pointer; flex: none;
+}
+.mf-icon-button:hover { background: var(--mf-hover); }
+.mf-icon-button:hover:active { background: var(--mf-pressed); }
+.mf-icon-button:disabled { opacity: 0.4; pointer-events: none; }
+.mf-icon-button.mf-on { color: var(--mf-accent); }
+
+/* ----------------------------------------------------------------- grid */
+
+.mf-grid { position: absolute; inset: 0; }
+.mf-grid-tiles, .mf-grid-lines { position: absolute; inset: 0; }
+.mf-grid-lines { pointer-events: none; }
+.mf-grid-overlay { position: absolute; inset: 0; pointer-events: none; z-index: 20; }
+
+.mf-tile {
+  position: absolute;
+  border-radius: var(--mf-radius-surface);
+  overflow: hidden;
+  box-shadow: var(--mf-tile-shadow);
+  background: var(--mf-tile-ground);
+  z-index: 1;
+  contain: layout;
+}
+.mf-grid.mf-has-full .mf-tile { box-shadow: none; }
+.mf-tile-body {
+  position: absolute; left: 0; top: 30px;
+  overflow: hidden;
+  background: var(--mf-tile-ground);
+  user-select: text; -webkit-user-select: text;
+  cursor: auto;
+}
+.mf-tile-body > * { width: 100%; height: 100%; }
+.mf-tile > .mf-summary.mf-in-tile { position: absolute; left: 0; right: 0; top: 30px; }
+
+.mf-gridline { position: absolute; pointer-events: auto; cursor: row-resize; z-index: 2; touch-action: none; }
+.mf-gridline.mf-vertical { cursor: col-resize; }
+
+/* A ring around the focused tile: drawn, taking no clicks. */
+.mf-focus-ring {
+  position: absolute; z-index: 5; pointer-events: none;
+  border-radius: var(--mf-radius-surface);
+  border: 2px solid var(--mf-accent-strong);
+}
+
+/* Where a dragged tile would land: half a column, for a new column; half a tile, above or below it. */
+.mf-drop-overlay {
+  position: absolute; z-index: 8; pointer-events: none;
+  background: var(--mf-drop);
+  border: 1px solid var(--mf-accent-soft);
+}
+
+.mf-ghost { contain: strict; }
+.mf-puffs { position: absolute; inset: 0; z-index: 31; pointer-events: none; }
+.mf-puff {
+  position: absolute; width: 64px; height: 64px; border-radius: 50%;
+  background: radial-gradient(circle closest-side, var(--mf-text-secondary) 0%, color-mix(in srgb, var(--mf-text-secondary) 50%, transparent) 45%, transparent 100%);
+  will-change: transform, opacity;
+}
+
+/* ------------------------------------------------------------ tile bar */
+
+.mf-bar {
+  position: absolute; left: 0; right: 0; top: 0; height: 30px;
+  cursor: grab; touch-action: none;
+  color: var(--mf-text-secondary);
+}
+.mf-bar-glass { position: absolute; inset: 0; background: var(--mf-bar); }
+.mf-bar.mf-focused .mf-bar-glass { background: var(--mf-bar-focused); }
+.mf-bar > :not(.mf-bar-glass) { position: absolute; }
+.mf-bar-icon, .mf-handle {
+  left: 10px; top: 8px; width: 16px; height: 14px;
+  display: flex; align-items: center; justify-content: center;
+  pointer-events: none;
+}
+.mf-bar.mf-focused .mf-bar-icon, .mf-bar.mf-focused .mf-handle { color: var(--mf-text); }
+.mf-handle { perspective: 90px; perspective-origin: 50% 50%; z-index: 3; }
+.mf-handle-face {
+  width: 16px; height: 14px; display: flex; align-items: center; justify-content: center;
+  transform-origin: 0 50%;
+}
+.mf-bar-stack-badge {
+  left: 20px; top: 15px; width: 11px; height: 11px; border-radius: 5.5px;
+  background: var(--mf-panel); display: flex; align-items: center; justify-content: center;
+}
+.mf-bar-name {
+  top: 0; height: 30px; line-height: 29px;
+  font-weight: 600; font-size: 13px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  color: var(--mf-text-secondary);
+  padding-left: 2px;
+  pointer-events: none;
+}
+.mf-bar.mf-focused .mf-bar-name { color: var(--mf-text); }
+.mf-bar-dot { color: var(--mf-text-secondary); }
+.mf-bar-dot.mf-stale { color: var(--mf-status-attention); }
+.mf-bar-place {
+  top: 0; height: 30px; line-height: 29px;
+  font-size: 11.5px; color: var(--mf-bar-ink);
+  white-space: nowrap; overflow: hidden;
+  padding-left: 2px;
+  pointer-events: none;
+}
+.mf-bar.mf-edits-place.mf-over-place { cursor: text; }
+.mf-bar-host {
+  top: 6px; height: 18px; border-radius: 9px;
+  background: color-mix(in srgb, var(--mf-text) 7%, transparent);
+  display: flex; align-items: center; gap: 3px; padding: 0 7px;
+  font-size: 11px; font-weight: 500; color: var(--mf-text-secondary);
+  white-space: nowrap; overflow: hidden; pointer-events: none;
+}
+.mf-bar-host span { overflow: hidden; text-overflow: ellipsis; }
+.mf-bar-button { top: 7px; width: 16px; height: 16px; color: var(--mf-bar-ink); margin-right: 0; }
+.mf-bar.mf-pointer-in .mf-bar-button { color: var(--mf-text-secondary); }
+.mf-bar-button.mf-on, .mf-bar.mf-pointer-in .mf-bar-button.mf-on { color: var(--mf-accent); }
+.mf-bar-glyph { top: 8.5px; width: 13px; height: 13px; color: var(--mf-text); }
+.mf-bar-status { top: 7px; }
+.mf-bar-editor {
+  top: 5px; height: 20px; border: 0; outline: 0; background: none; padding: 0 2px;
+  font: 11.5px var(--mf-font); color: var(--mf-text); cursor: text;
+  user-select: text; -webkit-user-select: text;
+}
+.mf-tile.mf-collapsed { box-shadow: var(--mf-tile-shadow); }
+
+/* -------------------------------------------------------------- links */
+
+.mf-links { top: 4px; height: 22px; pointer-events: none; z-index: 6; }
+.mf-link-face {
+  position: absolute; top: 0; width: 22px; height: 22px;
+  border-radius: var(--mf-radius-control);
+  background: var(--mf-panel);
+  box-shadow: inset 0 0 0 0.5px var(--mf-panel-border);
+  cursor: pointer; pointer-events: auto;
+  color: var(--mf-text-secondary);
+}
+.mf-link-face.mf-hovered { box-shadow: inset 0 0 0 1.5px var(--mf-edge-control); }
+.mf-link-face[data-depth="1"] { background: var(--mf-link-behind-1); pointer-events: none; }
+.mf-link-face[data-depth="2"] { background: var(--mf-link-behind-2); pointer-events: none; }
+.mf-link-face > span { position: absolute; display: flex; align-items: center; justify-content: center; }
+.mf-link-symbol { width: 12px; height: 12px; top: 5px; }
+.mf-link-symbol .mf-icon { width: 12px; height: 12px; }
+.mf-link-chevron { width: 5px; height: 8px; top: 7px; color: var(--mf-text); }
+.mf-link-chevron .mf-icon { width: 8px; height: 8px; flex: none; }
+/* The chevron on the side it points: › links to, ‹ linked from. */
+.mf-link-symbol:first-child { left: 2px; }
+.mf-link-symbol:first-child + .mf-link-chevron { left: 15px; }
+.mf-link-chevron:first-child { left: 2px; }
+.mf-link-chevron:first-child + .mf-link-symbol { left: 8px; }
+.mf-link-stack-front { z-index: 60; }
+.mf-link-scrub { position: absolute; left: 0; top: -4px; bottom: -4px; pointer-events: auto; cursor: pointer; }
+.mf-link-preview { position: absolute; z-index: 20; pointer-events: none; }
+
+/* ------------------------------------------------------- status marks */
+
+.mf-status-pill {
+  display: inline-flex; align-items: center; justify-content: center;
+  height: 16px; border-radius: 8px; flex: none;
+  font: 500 10.5px/16px var(--mf-font); white-space: nowrap;
+  color: var(--mf-text-secondary); background: var(--mf-pill);
+}
+.mf-status-needs { color: var(--mf-status-attention); background: color-mix(in srgb, var(--mf-status-attention) 16%, transparent); }
+.mf-status-failed { color: var(--mf-status-failed); background: color-mix(in srgb, var(--mf-status-failed) 14%, transparent); }
+.mf-status-progress { background: none; font: 400 11px/16px var(--mf-font); font-variant-numeric: tabular-nums; justify-content: flex-end; padding-right: 1px; }
+.mf-status-pill.mf-compact { width: 8px; background: none; }
+.mf-status-pill.mf-compact::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.mf-status-done.mf-compact, .mf-status-note.mf-compact { color: var(--mf-text-secondary); }
+
+.mf-pill {
+  display: inline-flex; align-items: center; justify-content: center;
+  height: 16px; min-width: 20px; padding: 0 6px; border-radius: 8px; flex: none;
+  background: var(--mf-pill); color: var(--mf-text-secondary);
+  font: 500 10.5px/16px var(--mf-font); font-variant-numeric: tabular-nums;
+}
+
+.mf-glyph { display: block; color: inherit; }
+.mf-glyph-needsYou, .mf-glyph-quiet { color: var(--mf-status-attention); }
+.mf-glyph-failed, .mf-glyph-failedRead, .mf-glyph-offline { color: var(--mf-status-failed); }
+.mf-glyph-connecting, .mf-glyph-doneRead, .mf-glyph-inactive { color: var(--mf-text-secondary); }
+.mf-glyph-watching { color: var(--mf-accent); }
+.mf-glyph-working, .mf-glyph-connecting { opacity: 0.9; }
+.mf-glyph-spin { transform-origin: 50% 50%; transform-box: view-box; animation: mf-spin 2s linear infinite; animation-delay: var(--mf-spin-phase, 0s); }
+@keyframes mf-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .mf-glyph-spin { animation: none; } }
+
+/* ------------------------------------------------------- summary card */
+
+.mf-summary {
+  position: relative; display: flex; overflow: hidden;
+  border-radius: var(--mf-radius-surface);
+  background: var(--mf-stack);
+  box-shadow: var(--mf-shadow-resting), inset 0 0 0 0.5px var(--mf-card-border);
+  padding: 10px 12px 0 12px;
+  color: var(--mf-text);
+}
+.mf-summary.mf-plain { background: none; box-shadow: none; border-radius: 0; }
+.mf-summary.mf-in-tile { background: var(--mf-tile-ground); box-shadow: none; border-radius: 0 0 var(--mf-radius-surface) var(--mf-radius-surface); }
+.mf-summary.mf-clickable { cursor: pointer; }
+.mf-summary.mf-chosen { background: color-mix(in srgb, var(--mf-text) 5%, var(--mf-stack)); box-shadow: var(--mf-shadow-resting), inset 0 0 0 1.5px color-mix(in srgb, var(--mf-text) 35%, transparent); }
+.mf-summary-text { flex: 1; min-width: 0; }
+.mf-summary-head { display: flex; align-items: center; height: 18px; gap: 8px; }
+.mf-summary-symbol { width: 14px; margin-right: 0; color: var(--mf-text-secondary); flex: none; display: flex; justify-content: center; }
+.mf-summary-title { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mf-summary-name { font-weight: 600; font-size: 13px; }
+.mf-summary-place { font-size: 11.5px; color: var(--mf-text-tertiary); margin-left: 8px; }
+.mf-summary-note { font-size: 11.5px; color: var(--mf-text-secondary); white-space: nowrap; flex: none; margin-left: 2px; }
+.mf-tone-running { color: var(--mf-accent-text); }
+.mf-tone-done { color: var(--mf-status-done); }
+.mf-tone-failed { color: var(--mf-status-failed); }
+.mf-tone-attention { color: var(--mf-status-attention); }
+.mf-summary-lines { margin-top: 3px; padding-left: 22px; font-size: 12px; }
+.mf-summary-lines.mf-code { font: 11.5px var(--mf-font-mono); }
+.mf-summary-line { height: 16px; line-height: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--mf-text-secondary); }
+.mf-summary-line:first-child { color: color-mix(in srgb, var(--mf-text) 85%, transparent); }
+.mf-summary-picture {
+  flex: none; align-self: flex-start; margin-left: 10px; margin-right: -2px;
+  height: 68px; max-width: 32%; object-fit: cover; border-radius: 6px;
+  box-shadow: 0 0 0 0.5px color-mix(in srgb, var(--mf-text) 12%, transparent);
+}
+.mf-summary-progress { position: absolute; left: 12px; right: 12px; bottom: 5px; height: 2px; border-radius: 1.5px; background: var(--mf-divider); }
+.mf-summary-progress-bar { height: 100%; border-radius: 1.5px; background: var(--mf-accent); }
+
+/* ------------------------------------------------- floating, in general */
+
+.mf-float {
+  background: var(--mf-panel);
+  border-radius: var(--mf-radius-surface);
+  box-shadow: var(--mf-shadow-float), 0 0 0 0.5px var(--mf-panel-border);
+}
+.mf-popover {
+  border-radius: 12px;
+  background: var(--mf-menu);
+  backdrop-filter: var(--mf-menu-frost); -webkit-backdrop-filter: var(--mf-menu-frost);
+  box-shadow: var(--mf-shadow-popover), 0 0 0 0.5px var(--mf-line);
+}
+
+/* --------------------------------------------------------------- drags */
+
+.mf-drag-layer { position: fixed; left: 0; top: 0; z-index: 2147483000; pointer-events: none; }
+.mf-drag-pills { position: absolute; }
+.mf-drag-pill {
+  position: absolute; right: 0; height: 24px; border-radius: 12px;
+  display: flex; align-items: center; gap: 6px; padding: 0 12px 0 10px;
+  background: var(--mf-drag-pill);
+  box-shadow: var(--mf-shadow-resting), inset 0 0 0 0.5px var(--mf-edge-control-hovered);
+  font: 500 12px var(--mf-font); color: var(--mf-text); white-space: nowrap;
+}
+.mf-drag-pill .mf-icon { color: var(--mf-text-secondary); }
+.mf-drag-pill span { max-width: 280px; overflow: hidden; text-overflow: ellipsis; }
+/* A tile moved by its bar: a card with its icon and title. */
+.mf-drag-tile {
+  position: absolute; height: 32px; border-radius: 16px;
+  display: flex; align-items: center; gap: 8px; padding: 0 16px 0 12px;
+  min-width: 138px; max-width: 318px;
+  background: color-mix(in srgb, var(--mf-window) 96%, transparent);
+  box-shadow: inset 0 0 0 1px var(--mf-sheet-edge-hovered);
+  font: 500 13px var(--mf-font); color: var(--mf-text); white-space: nowrap;
+}
+.mf-drag-tile .mf-icon { color: var(--mf-text-secondary); }
+.mf-drag-tile span { overflow: hidden; text-overflow: ellipsis; }
+/* What dropping does there: its symbol on a badge at the pill's corner, by the pointer. */
+.mf-drop-badge {
+  position: absolute; width: 20px; height: 20px; border-radius: 50%;
+  background: var(--mf-accent-fill); color: #fff;
+  box-shadow: var(--mf-shadow-resting), inset 0 0 0 1.5px #fff;
+  display: flex; align-items: center; justify-content: center;
+}
+.mf-drop-badge.mf-refused { background: #8e8e93; }
+/* The other forms a dropped thing can take, on rest or ⌃. */
+.mf-drop-palette {
+  position: fixed; z-index: 2147482000; width: 292px; padding: 6px;
+  border-radius: var(--mf-radius-surface);
+  background: var(--mf-stack);
+  box-shadow: var(--mf-shadow-resting), 0 0 0 0.5px var(--mf-card-border);
+  pointer-events: none;
+}
+.mf-drop-row { position: relative; height: 40px; border-radius: 6px; color: var(--mf-text); }
+.mf-drop-row .mf-icon { position: absolute; left: 12px; top: 12px; color: var(--mf-text-secondary); }
+.mf-drop-row-title { position: absolute; left: 38px; top: 4px; font-weight: 600; font-size: 13px; }
+.mf-drop-row-detail { position: absolute; left: 38px; right: 12px; top: 21px; font-size: 11.5px; color: var(--mf-text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mf-drop-row.mf-lit { background: var(--mf-accent-fill); color: #fff; box-shadow: inset 0 0 0 2px var(--mf-stack); }
+.mf-drop-row.mf-lit .mf-icon { color: #fff; }
+.mf-drop-row.mf-lit .mf-drop-row-detail { color: rgba(255, 255, 255, 0.85); }
+
+/* -------------------------------------------------------- empty state */
+
+.mf-empty { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; text-align: center; }
+.mf-empty-heading { font-weight: 600; font-size: 15px; line-height: 22px; }
+.mf-empty-buttons { display: flex; gap: 8px; }
+.mf-empty-note { font-size: 12px; color: var(--mf-text-tertiary); max-width: 340px; }
+
+/* ----------------------------------------------- the window's sidebar */
+
+.mf-sidebar-frame {
+  position: absolute; left: 6px; top: 6px; bottom: 6px; z-index: 10;
+  border-radius: var(--mf-radius-surface);
+}
+.mf-sidebar-frame.mf-floating {
+  background: color-mix(in srgb, var(--mf-panel) 94%, transparent);
+  box-shadow: var(--mf-shadow-float), 0 0 0 0.5px var(--mf-card-border);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+}
+.mf-sidebar-resize {
+  position: absolute; right: 0; top: 40px; bottom: 0; width: 7px; cursor: col-resize; z-index: 3; touch-action: none;
+}
+.mf-sidebar-resize::after {
+  content: ""; position: absolute; left: 2px; top: 50%; width: 3px; height: 36px; margin-top: -18px;
+  border-radius: 1.5px; background: var(--mf-handle); opacity: 0; transition: opacity var(--mf-fast);
+}
+.mf-sidebar-resize:hover::after, .mf-sidebar-resize.mf-dragging::after { opacity: 1; }
+
+/* A genie on its way. */
+.mf-genie { position: fixed; left: 0; top: 0; z-index: 45; pointer-events: none; }
